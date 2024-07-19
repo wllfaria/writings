@@ -1,0 +1,157 @@
+{
+  "main": {
+    "id": "1c33e8e7e918fbb3",
+    "type": "split",
+    "children": [
+      {
+        "id": "1f2e7ef10737fdb8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1c3f242ee21c3b25",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "build-your-own-window-manager/thoughts.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "1b4742c4edc5f42f",
+    "type": "split",
+    "children": [
+      {
+        "id": "40fa11f0003b8daf",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7a54dc66d5d5b4c2",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "062bf65fc2d59c8a",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "3df5902e9706181e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "1852a67fae8497ee",
+    "type": "split",
+    "children": [
+      {
+        "id": "5a2de7d077d79b0d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d9b5306360605f8d",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "build-your-own-window-manager/thoughts.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "fa0ef1337982c1f8",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "build-your-own-window-manager/thoughts.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "2999ff3fc300c941",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "82d1e59edc433a67",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "build-your-own-window-manager/thoughts.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false
+    }
+  },
+  "active": "1c3f242ee21c3b25",
+  "lastOpenFiles": [
+    "build-your-own-window-manager/Part 1.md",
+    "build-your-own-window-manager/thoughts.md",
+    "my-journey-learning-assembly.md",
+    "build-your-own-window-manager"
+  ]
+}

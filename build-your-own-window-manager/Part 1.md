@@ -1,13 +1,14 @@
 ---
 title: Build your own window manager
 description: 
-tags: 
-    - 'Rust'
-    - 'Window Manager'
-    - 'xcb'
+tags:
+  - Rust
+  - Window
+  - Manager
+  - xcb
 categories:
-    - 'Programming'
-date: "2024-01-01T16:35:00-03:00"
+  - Programming
+date: 2024-01-01T16:35:00-03:00
 draft: false
 ---
 
@@ -158,11 +159,6 @@ function `send_and_check_request` and what is that struct it takes?
 
 ## How communication with the X server works with XCB
 
-<div align="center">
-
-<img src="/images/blog/how-to-make-a-window-manager/x-server-communication-flow.png" height="300px" width="300px" />
-
-</div>
 
 This diagram illustrates how the communication with the X server usually works,
 we can subscribe for keyboard events, and we will get notified when certain
