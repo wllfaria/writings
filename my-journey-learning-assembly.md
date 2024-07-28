@@ -1,11 +1,11 @@
 ---
 title: My journey learning assembly
-description: Computers are really interesting machines. And you should learn how they work.
-tags: 
-    - 'Assembly'
+summary: Computers are really interesting machines. And you should learn how they work.
+tags:
+  - Assembly
 categories:
-    - 'Programming'
-date: "2024-01-01T16:35:00-03:00"
+  - Programming
+date: 2024-01-01T16:35:00-03:00
 draft: false
 ---
 

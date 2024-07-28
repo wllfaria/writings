@@ -1,6 +1,6 @@
 ---
 title: Build your own window manager
-description: 
+summary: 
 tags:
   - Rust
   - Window
@@ -11,7 +11,6 @@ categories:
 date: 2024-01-01T16:35:00-03:00
 draft: false
 ---
-
 Since I started using linux, one of the core components of my workflow always
 was my window manager, and if you're here, I am sure you already know what
 window managers are, after all, you're trying to learn how to make one, so I'll

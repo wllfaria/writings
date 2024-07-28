@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "1f2e7ef10737fdb8",
+        "id": "92197212b3f218ce",
         "type": "tabs",
         "children": [
           {
-            "id": "1c3f242ee21c3b25",
+            "id": "0f34a28b2a6adc5d",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "build-your-own-window-manager/thoughts.md",
+                "file": "implementing-syntax-highlighting/Implementing syntax highlighting.md",
                 "mode": "source",
                 "source": false
               }
@@ -49,7 +49,7 @@
               "type": "search",
               "state": {
                 "query": "",
-                "matchingCase": false,
+                "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
                 "extraContext": false,
@@ -69,7 +69,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 261
   },
   "right": {
     "id": "1852a67fae8497ee",
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "build-your-own-window-manager/thoughts.md",
+                "file": "implementing-syntax-highlighting/Implementing syntax highlighting.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "build-your-own-window-manager/thoughts.md",
+                "file": "implementing-syntax-highlighting/Implementing syntax highlighting.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "build-your-own-window-manager/thoughts.md"
+                "file": "implementing-syntax-highlighting/Implementing syntax highlighting.md"
               }
             }
           }
@@ -147,11 +147,15 @@
       "table-editor-obsidian:Advanced Tables Toolbar": false
     }
   },
-  "active": "1c3f242ee21c3b25",
+  "active": "0f34a28b2a6adc5d",
   "lastOpenFiles": [
+    "implementing-syntax-highlighting/thoughts.md",
+    "implementing-syntax-highlighting/Implementing syntax highlighting.md",
+    "().md",
     "build-your-own-window-manager/Part 1.md",
     "build-your-own-window-manager/thoughts.md",
     "my-journey-learning-assembly.md",
+    "implementing-syntax-highlighting",
     "build-your-own-window-manager"
   ]
 }
