@@ -1,19 +1,19 @@
 {
   "main": {
-    "id": "1c33e8e7e918fbb3",
+    "id": "b5a3a894a5aca498",
     "type": "split",
     "children": [
       {
-        "id": "6a25cf4eeae7c3ec",
+        "id": "7753935c1c4dfab6",
         "type": "tabs",
         "children": [
           {
-            "id": "3e28f46fa563822b",
+            "id": "03f14b361c16ba6b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "implementing-syntax-highlighting/Implementing syntax highlighting.md",
+                "file": "implementing-syntax-highlighting/implementing-syntax-highlighting.md",
                 "mode": "source",
                 "source": false
               }
@@ -25,15 +25,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "1b4742c4edc5f42f",
+    "id": "1af6a8f437c5fa6a",
     "type": "split",
     "children": [
       {
-        "id": "40fa11f0003b8daf",
+        "id": "e40e4f369370b03d",
         "type": "tabs",
         "children": [
           {
-            "id": "7a54dc66d5d5b4c2",
+            "id": "3eda632bbccf65b0",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -43,13 +43,13 @@
             }
           },
           {
-            "id": "062bf65fc2d59c8a",
+            "id": "7308c154d95778d8",
             "type": "leaf",
             "state": {
               "type": "search",
               "state": {
                 "query": "",
-                "matchingCase": true,
+                "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
                 "extraContext": false,
@@ -58,7 +58,7 @@
             }
           },
           {
-            "id": "3df5902e9706181e",
+            "id": "9f1ea59a3575212b",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -69,23 +69,24 @@
       }
     ],
     "direction": "horizontal",
-    "width": 261
+    "width": 200,
+    "collapsed": true
   },
   "right": {
-    "id": "1852a67fae8497ee",
+    "id": "b446674067039cee",
     "type": "split",
     "children": [
       {
-        "id": "5a2de7d077d79b0d",
+        "id": "71a314250a770fcf",
         "type": "tabs",
         "children": [
           {
-            "id": "d9b5306360605f8d",
+            "id": "69389f7ee0aba0d7",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "implementing-syntax-highlighting/Implementing syntax highlighting.md",
+                "file": "implementing-syntax-highlighting/implementing-syntax-highlighting.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -97,19 +98,19 @@
             }
           },
           {
-            "id": "fa0ef1337982c1f8",
+            "id": "d091e2bc3eef473d",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "implementing-syntax-highlighting/Implementing syntax highlighting.md",
+                "file": "implementing-syntax-highlighting/implementing-syntax-highlighting.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
             }
           },
           {
-            "id": "2999ff3fc300c941",
+            "id": "8855573c03247641",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -120,12 +121,12 @@
             }
           },
           {
-            "id": "82d1e59edc433a67",
+            "id": "1cc654ff9fc8335b",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "implementing-syntax-highlighting/Implementing syntax highlighting.md"
+                "file": "implementing-syntax-highlighting/implementing-syntax-highlighting.md"
               }
             }
           }
@@ -138,24 +139,24 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
-      "command-palette:Open command palette": false,
-      "table-editor-obsidian:Advanced Tables Toolbar": false
+      "command-palette:Open command palette": false
     }
   },
-  "active": "3e28f46fa563822b",
+  "active": "03f14b361c16ba6b",
   "lastOpenFiles": [
-    "implementing-syntax-highlighting/Implementing syntax highlighting.md",
+    "implementing-syntax-highlighting/implementing-syntax-highlighting.md",
     "implementing-syntax-highlighting/thoughts.md",
-    "().md",
-    "build-your-own-window-manager/Part 1.md",
-    "build-your-own-window-manager/thoughts.md",
+    "Welcome.md",
     "my-journey-learning-assembly.md",
     "implementing-syntax-highlighting",
+    "build-your-own-window-manager/thoughts.md",
+    "build-your-own-window-manager/Part 1.md",
     "build-your-own-window-manager"
   ]
 }
