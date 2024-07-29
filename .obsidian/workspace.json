@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "92197212b3f218ce",
+        "id": "6a25cf4eeae7c3ec",
         "type": "tabs",
         "children": [
           {
-            "id": "0f34a28b2a6adc5d",
+            "id": "3e28f46fa563822b",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -147,10 +147,10 @@
       "table-editor-obsidian:Advanced Tables Toolbar": false
     }
   },
-  "active": "0f34a28b2a6adc5d",
+  "active": "3e28f46fa563822b",
   "lastOpenFiles": [
-    "implementing-syntax-highlighting/thoughts.md",
     "implementing-syntax-highlighting/Implementing syntax highlighting.md",
+    "implementing-syntax-highlighting/thoughts.md",
     "().md",
     "build-your-own-window-manager/Part 1.md",
     "build-your-own-window-manager/thoughts.md",

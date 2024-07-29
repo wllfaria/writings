@@ -9,7 +9,6 @@ tags:
   - tree-sitter
   - code
 ---
-Syntax highlighting is one of the features we take for granted when we talk about any modern text editor, it's so common that we don't even think about the possibility of not having it available, but have you ever thought about how editors implement such feature? Well, recently this was hovering my mind and I decided to figure it out.
 
 ## How editors render text
 There are many ways editors render text to the screen, some render at certain FPS [(looking at you, zed)](https://github.com/zed-industries/zed). and others render every time an event happens, which is a common way of rendering text on modal text editors, each approach has its own quirks, but as I'm a huge advocate of the command line, I'll be mainly using [event-driven](https://en.wikipedia.org/wiki/Event-driven_architecture) rendering and modal text editors (like vim) as the subject of this article, although most of the things also apply to other implementations.
@@ -20,11 +19,13 @@ With this simple way of storing our code, we could implement a view to a text fi
 
 Starting here, I'll share a bunch of rust code snippets that [can be found here](https://github.com/wllfaria/tree_sitter_syntax_highlight). Lets look at this `Viewport` structure I've mentioned:
 ```rust
+use crossterm::style::Color;
+
 #[derive(Debug, Default, Clone)]
 pub struct Cell {
     symbol: char,
-    fg: Option<Color>,
-    bg: Option<Color>,
+    fg: Color,
+    bg: Color,
 }
 
 #[derive(Debug)]
@@ -34,7 +35,7 @@ pub struct Viewport {
 }
 ```
 
-This is the simplest form to represent a terminal screen we will use, we can start this viewport by setting the buffer vector to have a size of `columns * rows` available, and if we pretend we have every cell filled, we can simply calculate where each cell should be displayed before we print to the terminal.
+This is the simplest form to represent a terminal screen we will use, we can start this Viewport by setting the buffer vector to have a size of `columns * rows` available, and if we pretend we have every cell filled, we can simply calculate where each cell should be displayed before we print to the terminal.
 
 <details>
 
@@ -42,7 +43,7 @@ This is the simplest form to represent a terminal screen we will use, we can sta
 
 ```rust
 for (idx, cell) in self.buffer.enumerate() {}
-	let width = self.size.0;
+    let width = self.size.0;
 	let column = idx / width;
 	let row = idx % width;
 }
@@ -60,3 +61,20 @@ Woah... those are some funny words, magic man. Putting simply, tree sitter allow
 What makes tree sitter compelling is that it is efficient, and allow you to implement **incremental** parsing, which is a game changer, specially when talking about large files.
 
 ## Syntax highlighting with tree sitter
+To use tree sitter in basically any way, we need to set some things up, each language you want to parse will need a `Parser` which is the core component that turns the source code into an syntax tree that tree sitter can work onto. After making a parser, we need to tell it the rules by which our language should be parsed, and after that we can throw any piece of code of the given language and it will get parsed.
+
+```rust
+use tree_sitter::Parser;
+
+fn main() {
+	let source_code = include_str!("main.rs");
+	let mut parser = Parser::new();
+	let language = tree_sitter_rust::language();
+	parser.set_language(&language).unwrap();
+	let tree = parser.parse(&source_code, None).unwrap();
+}
+```
+
+For simplicity sake, I'll not be showing any form of error handling on the examples given here, if you want to see the full version, check it out on the [repository for this article](https://github.com/wllfaria/tree_sitter_syntax_highlight).
+
+When we parse some source code, we will get a tree from tree-sitter, this tree is what enable us to query for captures, which is how we will be calling every token that matches some query rule. Speaking of which, this tree is cool but we need a way to find out where each token is on the file so we can apply highlighting to it.
