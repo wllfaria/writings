@@ -22,7 +22,6 @@ use crossterm::*;
 pub struct Cell {
     symbol: char,
     fg: Color,
-    bg: Color,
 }
 
 impl Default for Cell {
@@ -30,7 +29,6 @@ impl Default for Cell {
 		Cell {
 			symbol: ' ',
 			fg: Color::Reset,
-			bg: Color::Reset,
 		}
 	}
 }
@@ -149,7 +147,6 @@ pub fn set_cell(&mut self, col: usize, row: usize, symbol: char) {
 	self.buffer[pos] = Cell {
 		symbol,
 		fg: Color::Reset,
-		bg: Color::Reset,
 	}
 }
 ```
@@ -307,33 +304,148 @@ With all that information, we get an existing entry, or insert a new one onto ou
 Now we need to map capture names to colors, so that we can finally see some colored text on our screens. I'll not explain much of this, so just copy this `HashMap` of some names that are present on our rust query to some arbitrary colors I've chosen.
 
 ```rust
+use std::collections::HashMap;
 use crossterm::style::Color;
-use std::{collections::HashMap, str::FromStr};
 
-pub fn make_colors() -> HashMap<&'static str, Color> {
+fn make_colors() -> HashMap<&'static str, Color> {
     let mut colors = HashMap::new();
-    colors.insert("function", Color::from_str("#7daea3").unwrap());
-    colors.insert("function.method", Color::from_str("#82aaff").unwrap());
-    colors.insert("function.macro", Color::from_str("#ff9e64").unwrap());
-    colors.insert("constant.builtin", Color::from_str("#ffcc66").unwrap());
-    colors.insert("constant", Color::from_str("#d8a657").unwrap());
-    colors.insert("type", Color::from_str("#569CD6").unwrap());
-    colors.insert("type.builtin", Color::from_str("#4EC9B0").unwrap());
-    colors.insert("constructor", Color::from_str("#B5CEA8").unwrap());
-    colors.insert("property", Color::from_str("#CE9178").unwrap());
-    colors.insert("variable.parameter", Color::from_str("#9CDCFE").unwrap());
-    colors.insert("variable.builtin", Color::from_str("#C586C0").unwrap());
-    colors.insert("label", Color::from_str("#D7BA7D").unwrap());
-    colors.insert("comment", Color::from_str("#608B4E").unwrap());
-    colors.insert("punctuation.bracket", Color::from_str("#D4D4D4").unwrap());
-    colors.insert("punctuation.delimiter", Color::from_str("#D4D4D4").unwrap());
-    colors.insert("keyword", Color::from_str("#C586C0").unwrap());
-    colors.insert("string", Color::from_str("#CE9178").unwrap());
-    colors.insert("escape", Color::from_str("#d7ba7d").unwrap());
-    colors.insert("operator", Color::from_str("#569CD6").unwrap());
-    colors.insert("attribute", Rgb::from_str("#4EC9B0").unwrap());
+    colors.insert("function", Color::Rgb { r: 0x7d, g: 0xae, b: 0xa3 });
+    colors.insert("function.method", Color::Rgb { r: 0x82, g: 0xaa, b: 0xff });
+    colors.insert("function.macro", Color::Rgb { r: 0xff, g: 0x9e, b: 0x64 });
+    colors.insert("constant.builtin", Color::Rgb { r: 0xff, g: 0xcc, b: 0x66 });
+    colors.insert("constant", Color::Rgb { r: 0xd8, g: 0xa6, b: 0x57 });
+    colors.insert("type", Color::Rgb { r: 0x56, g: 0x9C, b: 0xD6 });
+    colors.insert("type.builtin", Color::Rgb { r: 0x4E, g: 0xC9, b: 0xB0 });
+    colors.insert("constructor", Color::Rgb { r: 0xB5, g: 0xCE, b: 0xA8 });
+    colors.insert("property", Color::Rgb { r: 0xCE, g: 0x91, b: 0x78 });
+    colors.insert("variable.parameter", Color::Rgb { r: 0x9C, g: 0xDC, b: 0xFE });
+    colors.insert("variable.builtin", Color::Rgb { r: 0xC5, g: 0x86, b: 0xC0 });
+    colors.insert("label", Color::Rgb { r: 0xD7, g: 0xBA, b: 0x7D });
+    colors.insert("comment", Color::Rgb { r: 0x60, g: 0x8B, b: 0x4E });
+    colors.insert("punctuation.bracket", Color::Rgb { r: 0xD4, g: 0xD4, b: 0xD4 });
+    colors.insert("punctuation.delimiter", Color::Rgb { r: 0xD4, g: 0xD4, b: 0xD4 });
+    colors.insert("keyword", Color::Rgb { r: 0xC5, g: 0x86, b: 0xC0 });
+    colors.insert("string", Color::Rgb { r: 0xCE, g: 0x91, b: 0x78 });
+    colors.insert("escape", Color::Rgb { r: 0xd7, g: 0xba, b: 0x7d });
+    colors.insert("operator", Color::Rgb { r: 0x56, g: 0x9C, b: 0xD6 });
+    colors.insert("attribute", Color::Rgb { r: 0x4E, g: 0xC9, b: 0xB0 });
     colors
 }
 ```
 
-Cool, most of our work is now done, we are on the verge of having a basic syntax highlighting implementation working, we just need to do a few adjustments to the things we already have in order to query for a capture and get its color in case it matches any.
+Cool, most of our work is now done, we are on the verge of having a basic syntax highlighting implementation working, we just need to do a few adjustments to the things we already have in order to query for a capture and get its color in case it matches any, lets start modifying our `Viewport`'s `set_cell` function to also take in a `Color`.
+
+```diff-rust
+-    pub fn set_cell(&mut self, col: usize, row: usize, symbol: char) {
++    pub fn set_cell(&mut self, col: usize, row: usize, symbol: char, color: Color) {
+-        self.buffer[pos] = Cell {
+-            symbol,
+-            fg: Color::Reset,
+-        }
++        self.buffer[pos] = Cell { symbol, fg: color }
+	 }
+```
+
+Similarly, we need to modify our `fill` function, for simplicity, we are going to accept a closure that takes in a row and column number, and produces a `Color`, so we can pass any implementation we want as long as it matches the signature.
+
+```diff-rust
+-    pub fn fill<T, U>(&mut self, mut code: T)
++    pub fn fill<T, U, S>(&mut self, mut code: T, style_extractor: S)
+     where
+         T: Iterator<Item = U>,
+         U: AsRef<str>,
++        S: Fn(usize, usize) -> Color,
+     {
+         for row in 0..self.size.1 {
+             let line = code.next();
+             for col in 0..self.size.0 {
+                 let symbol = match line {
+                     Some(ref l) => l.as_ref().chars().nth(col).unwrap_or(' '),
+                     None => ' ',
+                 };
+                 let symbol = match symbol {
+                     s if s.is_whitespace() => ' ',
+                     s => s,
+                 };
+-                self.set_cell(col, row, symbol, style);
++                let style = style_extractor(col, row);
++                self.set_cell(col, row, symbol, style);
+             }
+         }
+     }
+```
+
+And the last required touch on our viewport is to also set the foreground color of the terminal to the cell's foreground color. Which is also really simple with crossterm.
+
+```diff-rust
+    pub fn render(&self) {
+        for (idx, cell) in self.buffer.iter().enumerate() {
+            let row = idx / self.size.0;
+            let col = idx % self.size.0;
+            crossterm::queue!(
+                stdout(),
+                crossterm::cursor::MoveTo(col as u16, row as u16),
++               crossterm::style::SetForegroundColor(cell.fg),
+                crossterm::style::Print(cell.symbol)
+            )
+            .expect("Failed to queue events to stdout");
+        }
+        stdout().flush().expect("Failed to flush stdout");
+    }
+```
+
+Great, now we still have an issue, our main function no longer works, as now we don't have a closure that fulfills what we just specified, lets create it now, this closure should take in two arguments, `column` and `row`, and return a `Color` our main function will look like this after these changes:
+
+```diff-rust
+ fn main() {
+     let content = include_str!("main.rs");
+     let mut viewport = viewport::Viewport::new();
+     let text_object = text_object::TextObject::new(content);
+ 
+     let mut parser = tree_sitter::Parser::new();
+     let language = tree_sitter_rust::language();
+     parser.set_language(&language).unwrap();
+     let tree = parser.parse(content, None).unwrap();
+     let query = tree_sitter::Query::new(&language, tree_sitter_rust::HIGHLIGHTS_QUERY).unwrap();
+     let mut cursor = tree_sitter::QueryCursor::new();
+     let root_node = tree.root_node();
+     let matches = cursor.matches(&query, root_node, content.as_bytes());
+ 
+     let mut capture_map = HashMap::new();
+     for m in matches {
+         for capture in m.captures {
+             let node = capture.node;
+             let start = node.start_position();
+             let end = node.end_position();
+             let name = query.capture_names()[capture.index as usize];
+             let line_list = capture_map.entry(start.row).or_insert(vec![]);
+             line_list.push((start.column..end.column, name))
+         }
+     }
+ 
++    let colors = colors::make_colors();
++
++    let style_extractor = |col: usize, row: usize| {
++        let Some(name) = capture_map
++            .get(&row)
++            .and_then(|entry| entry.iter().find(|(range, _)| range.contains(&col)))
++            .map(|(_, name)| name)
++        else {
++            return crossterm::style::Color::Reset;
++        };
++
++        colors
++            .get(name)
++            .cloned()
++            .unwrap_or(crossterm::style::Color::Reset)
++    };
+
+-    viewport.fill(text_object.get_within(0..viewport.size.1));
++    viewport.fill(text_object.get_within(0..viewport.size.1), style_extractor);
+     viewport.render();
+ }
+```
+
+Congratulations! If you run the program you'll see my awesome hand picked colors for syntax highlighting. We could pretty much say we are done here, although this project is not really close from being an editor, if we just read from stdin rather than directly from a file, and were a bit smarter about different file types, we would have something pretty similar to `cat` but with syntax highlighting, i think that's pretty cool, if you wanted to find out how to use tree sitter to implement basic syntax highlighting, we are done.
+
+But since i'm a nerd, I'll take the next sections of this article to talk about other approaches, drawbacks, and optimizations we could implement to our syntax highlighting to make it even better.
