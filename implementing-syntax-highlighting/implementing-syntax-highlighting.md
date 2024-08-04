@@ -248,7 +248,92 @@ I'll not explain a lot of the details behind Tree Sitter as this is guide aims t
 
 With the example above, we now have a tree that  represents our source code, but to implement syntax highlighting we need to do a little more. Tree sitter has a concept of queries, which uses a syntax that is very similar to lisp, you'll notice that tree-sitter uses S-Expressions to represent the grammars, but this is not really relevant for now.
 
-`tree_sitter_rust` also provide us with a query for rust, but you could write your own to change the capture names or how things are grouped, but for our use case the default one is more than enough, 
+`tree_sitter_rust` also provide us with a query for rust, but you could write your own to change the capture names or how things are grouped, but for our use case the default one is more than enough.
+
+```rust
+fn main() {
+	// ...
+    let mut parser = tree_sitter::Parser::new();
+    let language = tree_sitter_rust::language();
+    parser.set_language(&language).unwrap();
+    let tree = parser.parse(content, None).unwrap();
+    let query = tree_sitter::Query::new(&language, tree_sitter_rust::HIGHLIGHTS_QUERY).unwrap();
+    let mut cursor = tree_sitter::QueryCursor::new();
+    let root_node = tree.root_node();
+    let matches = cursor.matches(&query, root_node, content.as_bytes());
+	// ...
+}
+```
+
+The matches is an iterator over all the matches in the code we just parsed, starting from the `root_node` of our tree and going through all the code, each match represents a node, and has its start and end position, and also line and column on the source file, which starts to bring up the question, how will we use this list of captures to highlight our code?
 
 ## Strategies for syntax highlighting
-I've met a few ways to go 
+When I was first searching about this topic, I couldn't find that much information about it, so I spent a long time looking into open source text editors to check their implementations, and looking for technical content to educate myself on the subject.
+
+The most naive solution I can think of would be to just check if a given cell of our buffer is present on this list of captures within any range, and apply some styling accordingly, but we don't need to think too much about it to see that this solution is not the most viable one, as we would potentially iterate over all the captures on a possibly massive list of matches, which would make our code very slow.
+
+So what are the alternatives? Well, turns out there are many, I'm going to show a simple one, where we will iterate over our capture list and convert it into a data structure that allows us to have better lookups, a `HashMap` of line numbers to a list of captures on that given line. Let me explain.
+
+When we start filling our buffer, we always know, or can easily calculate which line and column a cell is within the text content, so if we map the captures into smaller lists, each list representing a single line, and have each line easily accessible through keys of a HashMap, we would optimize a lot the amount of iterations we would have to do, so, lets do that
+
+```rust
+fn main() {
+	// ...
+    let mut cursor = tree_sitter::QueryCursor::new();
+    let root_node = tree.root_node();
+    let matches = cursor.matches(&query, root_node, content.as_bytes());
+
+	let mut capture_map = HashMap::new();
+	for m in matches {
+		for capture in m.captures {
+			let node = capture.node;
+			let start = node.start_position();
+			let end = node.end_position();
+			let name = query.capture_names()[capture.index as usize];
+			let line_list = capture_map.entry(start.row).or_insert(vec![]);
+			line_list.push((start.column..end.column, name))
+		}
+	}
+
+    viewport.fill(text_object.get_within(0..viewport.size.1));
+    viewport.render();
+}
+```
+
+A match in tree sitter can be a scope of your code, like a function, and this scope can have multiple captures inside of it, like variables, arguments, and all the other pieces that constructs a function, thats why we have to go over every match, and every capture of each match. Each capture gives us the node, which has a start and end position, and also has an index that can be used to get the name of the capture from  the query.
+
+With all that information, we get an existing entry, or insert a new one onto our map, and push the start/end column of a capture along with its name so we can look up the captures when rendering.
+
+Now we need to map capture names to colors, so that we can finally see some colored text on our screens. I'll not explain much of this, so just copy this `HashMap` of some names that are present on our rust query to some arbitrary colors I've chosen.
+
+```rust
+use crossterm::style::Color;
+use std::{collections::HashMap, str::FromStr};
+
+pub fn make_colors() -> HashMap<&'static str, Color> {
+    let mut colors = HashMap::new();
+    colors.insert("function", Color::from_str("#7daea3").unwrap());
+    colors.insert("function.method", Color::from_str("#82aaff").unwrap());
+    colors.insert("function.macro", Color::from_str("#ff9e64").unwrap());
+    colors.insert("constant.builtin", Color::from_str("#ffcc66").unwrap());
+    colors.insert("constant", Color::from_str("#d8a657").unwrap());
+    colors.insert("type", Color::from_str("#569CD6").unwrap());
+    colors.insert("type.builtin", Color::from_str("#4EC9B0").unwrap());
+    colors.insert("constructor", Color::from_str("#B5CEA8").unwrap());
+    colors.insert("property", Color::from_str("#CE9178").unwrap());
+    colors.insert("variable.parameter", Color::from_str("#9CDCFE").unwrap());
+    colors.insert("variable.builtin", Color::from_str("#C586C0").unwrap());
+    colors.insert("label", Color::from_str("#D7BA7D").unwrap());
+    colors.insert("comment", Color::from_str("#608B4E").unwrap());
+    colors.insert("punctuation.bracket", Color::from_str("#D4D4D4").unwrap());
+    colors.insert("punctuation.delimiter", Color::from_str("#D4D4D4").unwrap());
+    colors.insert("keyword", Color::from_str("#C586C0").unwrap());
+    colors.insert("string", Color::from_str("#CE9178").unwrap());
+    colors.insert("escape", Color::from_str("#d7ba7d").unwrap());
+    colors.insert("operator", Color::from_str("#569CD6").unwrap());
+    colors.insert("attribute", Rgb::from_str("#4EC9B0").unwrap());
+    colors
+}
+```
+
+Cool, most of our work is now done, we are on the verge of having a basic syntax highlighting implementation working, we just need to do a few adjustments to the things we already have in order to query for a capture and get its color in case it matches any.
