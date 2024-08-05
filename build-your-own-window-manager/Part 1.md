@@ -9,7 +9,7 @@ tags:
 categories:
   - Programming
 date: 2024-01-01T16:35:00-03:00
-draft: false
+draft: true
 ---
 Since I started using linux, one of the core components of my workflow always
 was my window manager, and if you're here, I am sure you already know what

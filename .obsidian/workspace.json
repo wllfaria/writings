@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "implementing-syntax-highlighting/implementing-syntax-highlighting.md",
+                "file": "my-journey-learning-assembly.md",
                 "mode": "source",
                 "source": true
               }
@@ -69,8 +69,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "b446674067039cee",
@@ -86,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "implementing-syntax-highlighting/implementing-syntax-highlighting.md",
+                "file": "my-journey-learning-assembly.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "implementing-syntax-highlighting/implementing-syntax-highlighting.md",
+                "file": "my-journey-learning-assembly.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "implementing-syntax-highlighting/implementing-syntax-highlighting.md"
+                "file": "my-journey-learning-assembly.md"
               }
             }
           }
@@ -150,13 +149,13 @@
   },
   "active": "03f14b361c16ba6b",
   "lastOpenFiles": [
+    "build-your-own-window-manager/Part 1.md",
     "implementing-syntax-highlighting/implementing-syntax-highlighting.md",
     "implementing-syntax-highlighting/thoughts.md",
     "Welcome.md",
     "my-journey-learning-assembly.md",
     "implementing-syntax-highlighting",
     "build-your-own-window-manager/thoughts.md",
-    "build-your-own-window-manager/Part 1.md",
     "build-your-own-window-manager"
   ]
 }

@@ -1,16 +1,19 @@
 ---
 title: Implementing syntax highligting
-draft: true
+draft: false
 summary: How editors implement syntax highlighting and why tree sitter is incredible.
-date: 2024-07-29T11:35:00-03:00
+date: 2024-08-04T23:13:00-03:00
 tags:
   - rust
   - text-editor
   - tree-sitter
-  - code
+  - syntax-highlighting
 ---
+
+I'm a huge text editor nerd, I mean, we use them every day how would we not be even remotely intrigued by how they function? I've been playing around with these ideas a lot in the past few months, going as far as even implementing a really silly text editor in rust, and one of the subjects that really caught my attention was syntax highlighting. I remember not finding that much content about this topic, and had to really dig to find any information, this is one of the motivators for this blog post.
+
 ## How editors render text
-There are many ways editors render text to the screen, some render at certain FPS [(looking at you, zed)](https://github.com/zed-industries/zed). and others render every time an event happens, which is a common way of rendering text on modal text editors, each approach has its own quirks, but as I'm a huge advocate of the command line, I'll be mainly using [event-driven](https://en.wikipedia.org/wiki/Event-driven_architecture) rendering and modal text editors (like vim) as the subject of this article, although most of the things also apply to other implementations.
+There are many ways editors render text to the screen, some render at certain FPS [(looking at you, zed)](https://github.com/zed-industries/zed). and others render every time an event happens, which is a common way of rendering text on modal text editors, each approach has its own quirks, and this is not really that relevant for what we are building here.
 
 I've met countless strategies of rendering text, but for simplicity, I'll show here one of the simpler ways I've stumbled upon. We can think of a terminal screen as a long list of `cells`, those cells are spots where a character could be rendered and, as long as we know the size in rows and columns of the terminal, we can calculate where each cell index should be located.
 
@@ -446,6 +449,6 @@ Great, now we still have an issue, our main function no longer works, as now we 
  }
 ```
 
-Congratulations! If you run the program you'll see my awesome hand picked colors for syntax highlighting. We could pretty much say we are done here, although this project is not really close from being an editor, if we just read from stdin rather than directly from a file, and were a bit smarter about different file types, we would have something pretty similar to `cat` but with syntax highlighting, i think that's pretty cool, if you wanted to find out how to use tree sitter to implement basic syntax highlighting, we are done.
+Congratulations! If you run the program you'll see my awesome hand picked colors for syntax highlighting. We could pretty much say we are done here, although this project is not really close from being an editor, if we just read from stdin rather than directly from a file, and were a bit smarter about different file types, we would have something pretty similar to `cat` but with syntax highlighting, i think that's pretty cool.
 
-But since i'm a nerd, I'll take the next sections of this article to talk about other approaches, drawbacks, and optimizations we could implement to our syntax highlighting to make it even better.
+You can find the finished code for this article on the [main branch of the repository](https://github.com/wllfaria/syntax_highlighting), and I hope you enjoyed this read, thanks for reaching this far.
