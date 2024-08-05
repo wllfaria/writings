@@ -19,65 +19,39 @@ There are many ways editors render text to the screen, some render at certain FP
 I've met countless strategies for rendering text, but for simplicity, I'll show here one of the simpler ways I've stumbled upon. We can think of a terminal screen as a long list of `cells`, those cells are spots where a character could be rendered, and, as long as we know the size in rows and columns of the terminal, we can calculate where each cell index should be located.
 
 ```rust
-
 use crossterm::style::Color;
-
 use crossterm::*;
 
 #[derive(Debug, Clone)]
-
 pub struct Cell {
-
     symbol: char,
-
     fg: Color,
-
 }
 
 impl Default for Cell {
-
-fn default() -> Cell {
-
-Cell {
-
-symbol: ' ',
-
-fg: Color::Reset,
-
-}
-
-}
-
+	fn default() -> Cell {
+		Cell {
+			symbol: ' ',
+			fg: Color::Reset,
+		}
+	}
 }
 
 #[derive(Debug)]
-
 pub struct Viewport {
-
     buffer: Vec<Cell>,
-
     pub size: (usize, usize),
-
 }
 
 impl Viewport {
-
-pub fn new() -> Viewport {
-
-let (cols, rows) = terminal::size().unwrap();
-
-Viewport {
-
-buffer: vec![Default::default(); (cols * rows) as usize],
-
-size: (cols as usize, rows as usize)
-
+	pub fn new() -> Viewport {
+		let (cols, rows) = terminal::size().unwrap();
+		Viewport {
+			buffer: vec![Default::default(); (cols * rows) as usize],
+			size: (cols as usize, rows as usize)
+		}
+	}
 }
-
-}
-
-}
-
 ```
 
 Here, we create a single vector of cells to be more efficient with the total size of `columns * rows` of the terminal, which we get from [crossterm](https://github.com/crossterm-rs/crossterm) and initialize every cell to our default cell, which is merely a space without any style to it, this style is what we will fill with colors when we implement syntax highlighting later.
@@ -87,9 +61,7 @@ Here, we create a single vector of cells to be more efficient with the total siz
 <summary>Add crossterm to your project through Cargo</summary>
 
 ```shell
-
 cargo add crossterm
-
 ```
 
 </details>
@@ -105,49 +77,31 @@ We are not going to go into the pros and cons of each implementation, this might
 There is a very neat rust library called `ropey` that provides a very nice rope interface, and it's actually very easy to use. So we can just define our `TextObject` struct to hold an instance of a rope, which we will use to manipulate the source code text and display it onscreen.
 
 ```rust
-
 use std::ops::Range;
 
 #[derive(Debug)]
-
 pub struct TextObject {
-
     content: ropey::Rope,
-
 }
 
 impl TextObject {
-
     pub fn new(source_code: &'static str) -> TextObject {
-
         TextObject {
-
             content: ropey::Rope::from_str(source_code),
-
         }
-
     }
-
 }
-
 ```
 
 Let's also make a public method to easily get a range of lines to display onscreen, so we can iterate over these lines and display them.
 
 ```rust
-
 pub fn get_within(&self, range: Range<usize>) -> impl Iterator<Item = &str> {
-
-self.content
-
-.lines_at(range.start)
-
-.take(range.end - range.start)
-
-.map(|s| s.as_str().unwrap_or(""))
-
+	self.content
+	.lines_at(range.start)
+	.take(range.end - range.start)
+	.map(|s| s.as_str().unwrap_or(""))
 }
-
 ```
 
 <details>
@@ -155,9 +109,7 @@ self.content
 <summary>Add ropey to your project through cargo</summary>
 
 ```sh
-
 cargo add ropey
-
 ```
 
 </details>
@@ -173,47 +125,26 @@ Let us modify our `Viewport` by adding a few new functions, one will fill the ce
 The approach we will follow here is a flexible approach that can later be extended to add double buffering and also other optimizations, but I'll talk about them later. Let's start by implementing a function to fill the viewport from the iterator.
 
 ```rust
-
 pub fn fill<T, U>(&mut self, mut code: T)
-
-where
-
-T: Iterator<Item = U>,
-
-U: AsRef<str>,
-
-{
-
-for row in 0..self.size.1 {
-
-let line = code.next();
-
-for col in 0..self.size.0 {
-
-let symbol = match line {
-
-Some(ref l) => l.as_ref().chars().nth(col).unwrap_or(' '),
-
-None => ' ',
-
-};
-
-let symbol = match symbol {
-
-s if s.is_whitespace() => ' ',
-
-s => s,
-
-};
-
-self.set_cell(col, row, symbol);
-
+	where
+		T: Iterator<Item = U>,
+		U: AsRef<str>,
+	{
+	for row in 0..self.size.1 {
+		let line = code.next();
+		for col in 0..self.size.0 {
+			let symbol = match line {
+				Some(ref l) => l.as_ref().chars().nth(col).unwrap_or(' '),
+				None => ' ',
+			};
+			let symbol = match symbol {
+				s if s.is_whitespace() => ' ',
+				s => s,
+			};
+			self.set_cell(col, row, symbol);
+		}
+	}
 }
-
-}
-
-}
-
 ```
 
 Ok, we are doing quite a lot here, so let me explain. The first piece of this function is its declaration. Our function takes in a generic argument that can be any iterator that yields `&str` as its inner type.
@@ -221,21 +152,13 @@ Ok, we are doing quite a lot here, so let me explain. The first piece of this fu
 Our inner loops go over every possible cell within the viewport and check if there is any available character to store in our buffer; otherwise, we just store an empty space. We are calling a utility function that looks like this:
 
 ```rust
-
 pub fn set_cell(&mut self, col: usize, row: usize, symbol: char) {
-
-let pos = row * self.size.0 + col;
-
-self.buffer[pos] = Cell {
-
-symbol,
-
-fg: Color::Reset,
-
+	let pos = row * self.size.0 + col;
+	self.buffer[pos] = Cell {
+		symbol,
+		fg: Color::Reset,
+	}
 }
-
-}
-
 ```
 
 Let's not worry too much about the styles for now, we will get back to them once we start implementing syntax highlighting. We are almost ready to render something to the screen, all we need to implement now is a function to render the contents of our `Viewport`'s buffer and some glue code that will read a file and use our structures to display the contents of that file to the terminal.
@@ -243,33 +166,19 @@ Let's not worry too much about the styles for now, we will get back to them once
 Still on our Viewport, let's create a function to go over every cell in the buffer and queue a print to the stdout on that cell's respective location. This is really simple with the help of crossterm.
 
 ```rust
-
 pub fn render(&self) {
-
-for (idx, cell) in self.buffer.iter().enumerate() {
-
-let row = idx / self.size.0;
-
-let col = idx % self.size.0;
-
-crossterm::queue!(
-
-stdout(),
-
-crossterm::cursor::MoveTo(col as u16, row as u16),
-
-crossterm::style::Print(cell.symbol)
-
-)
-
-.expect("Failed to queue events to stdout");
-
+	for (idx, cell) in self.buffer.iter().enumerate() {
+		let row = idx / self.size.0;
+		let col = idx % self.size.0;
+		crossterm::queue!(
+			stdout(),
+			crossterm::cursor::MoveTo(col as u16, row as u16),
+			crossterm::style::Print(cell.symbol)
+		)
+		.expect("Failed to queue events to stdout");
+	}
+	stdout().flush().expect("Failed to flush stdout");
 }
-
-stdout().flush().expect("Failed to flush stdout");
-
-}
-
 ```
 
 This is a very simple function that simply iterates over every cell and uses that simple formula to translate from the index of a cell to its location onscreen. With that position, we use crossterm functions to move the cursor to that location and print the symbol of that cell to that row and column.
@@ -277,25 +186,16 @@ This is a very simple function that simply iterates over every cell and uses tha
 Let's not worry about the other fields `fg` and `bg` of our cells, although I'm pretty sure you can already imagine how we are going to use them later. Let's write our glue code and finally test our program. It's time to write our main function.
 
 ```rust
-
 mod text_object;
-
 mod viewport;
 
 fn main() {
-
     let content = include_str!("main.rs");
-
     let mut viewport = viewport::Viewport::new();
-
     let text_object = text_object::TextObject::new(content);
-
     viewport.fill(text_object.get_within(0..viewport.size.1));
-
     viewport.render();
-
 }
-
 ```
 
 If you followed along to this point, running `cargo run` on your terminal will print the content of our `main.rs` function, which indicates that everything we did worked as expected! You now have what could be the beginning of a text editor, a simple pager, or whatever you want to make with it.
@@ -329,31 +229,19 @@ To use tree-sitter in basically any way, we need to set some things up. Each lan
 Let's modify our main function to include our parser and all the setup to start parsing a language, it's pretty simple.
 
 ```rust
-
 mod text_object;
-
 mod viewport;
 
 fn main() {
-
     let content = include_str!("main.rs");
-
     let mut viewport = viewport::Viewport::new();
-
     let text_object = text_object::TextObject::new(content);
-
     let mut parser = tree_sitter::Parser::new();
-
     let language = tree_sitter_rust::language();
-
     parser.set_language(&language).unwrap();
-
     let tree = parser.parse(content, None).unwrap();
-
     viewport.fill(text_object.get_within(0..viewport.size.1));
-
     viewport.render();
-
 }
 
 ```
@@ -379,29 +267,17 @@ With the example above, we now have a tree that represents our source code, but 
 ```rust
 
 fn main() {
-
-// ...
-
+	// ...
     let mut parser = tree_sitter::Parser::new();
-
     let language = tree_sitter_rust::language();
-
     parser.set_language(&language).unwrap();
-
     let tree = parser.parse(content, None).unwrap();
-
     let query = tree_sitter::Query::new(&language, tree_sitter_rust::HIGHLIGHTS_QUERY).unwrap();
-
     let mut cursor = tree_sitter::QueryCursor::new();
-
     let root_node = tree.root_node();
-
     let matches = cursor.matches(&query, root_node, content.as_bytes());
-
-// ...
-
+	// ...
 }
-
 ```
 
 The `matches` is an iterator over all the matches in the code we just parsed, starting from the `root_node` of our tree and going through all the code, each match represents a node and has its start and end position, as well as line and column on the source file, which starts to bring up the question, How will we use this list of captures to highlight our code?
@@ -417,45 +293,25 @@ So what are the alternatives? Well, it turns out there are many, I'm going to sh
 When we start filling our buffer, we always know, or can easily calculate, which line and column a cell is within the text content, so if we map the captures into smaller lists, each list representing a single line, and have each line easily accessible through keys of a HashMap, we would optimize a lot the number of iterations we would have to do, so let's do that.
 
 ```rust
-
 fn main() {
-
-// ...
-
-    let mut cursor = tree_sitter::QueryCursor::new();
-
-    let root_node = tree.root_node();
-
-    let matches = cursor.matches(&query, root_node, content.as_bytes());
-
-let mut capture_map = HashMap::new();
-
-for m in matches {
-
-for capture in m.captures {
-
-let node = capture.node;
-
-let start = node.start_position();
-
-let end = node.end_position();
-
-let name = query.capture_names()[capture.index as usize];
-
-let line_list = capture_map.entry(start.row).or_insert(vec![]);
-
-line_list.push((start.column..end.column, name))
-
+	// ...
+	let mut cursor = tree_sitter::QueryCursor::new();
+	let root_node = tree.root_node();
+	let matches = cursor.matches(&query, root_node, content.as_bytes());
+	let mut capture_map = HashMap::new();
+	for m in matches {
+		for capture in m.captures {
+			let node = capture.node;
+			let start = node.start_position();
+			let end = node.end_position();
+			let name = query.capture_names()[capture.index as usize];
+			let line_list = capture_map.entry(start.row).or_insert(vec![]);
+			line_list.push((start.column..end.column, name))
+		}
+	}
+	viewport.fill(text_object.get_within(0..viewport.size.1));
+	viewport.render();
 }
-
-}
-
-    viewport.fill(text_object.get_within(0..viewport.size.1));
-
-    viewport.render();
-
-}
-
 ```
 
 A match in tree sitter can be a scope of your code, like a function, and this scope can have multiple captures inside of it, like variables, arguments, and all the other pieces that construct a function. That's why we have to go over every match and every capture of each match. Each capture gives us the node, which has a start and end position, and also has an index that can be used to get the name of the capture from the query.
@@ -465,261 +321,142 @@ With all that information, we get an existing entry or insert a new one onto our
 Now we need to map capture names to colors so that we can finally see some colored text on our screens. I'll not explain much of this, so just copy this `HashMap` of some names that are present on our rust query to some arbitrary colors I've chosen.
 
 ```rust
-
 use std::collections::HashMap;
-
 use crossterm::style::Color;
 
 fn make_colors() -> HashMap<&'static str, Color> {
-
     let mut colors = HashMap::new();
-
     colors.insert("function", Color::Rgb { r: 0x7d, g: 0xae, b: 0xa3 });
-
     colors.insert("function.method", Color::Rgb { r: 0x82, g: 0xaa, b: 0xff });
-
     colors.insert("function.macro", Color::Rgb { r: 0xff, g: 0x9e, b: 0x64 });
-
     colors.insert("constant.builtin", Color::Rgb { r: 0xff, g: 0xcc, b: 0x66 });
-
     colors.insert("constant", Color::Rgb { r: 0xd8, g: 0xa6, b: 0x57 });
-
     colors.insert("type", Color::Rgb { r: 0x56, g: 0x9C, b: 0xD6 });
-
     colors.insert("type.builtin", Color::Rgb { r: 0x4E, g: 0xC9, b: 0xB0 });
-
     colors.insert("constructor", Color::Rgb { r: 0xB5, g: 0xCE, b: 0xA8 });
-
     colors.insert("property", Color::Rgb { r: 0xCE, g: 0x91, b: 0x78 });
-
     colors.insert("variable.parameter", Color::Rgb { r: 0x9C, g: 0xDC, b: 0xFE });
-
     colors.insert("variable.builtin", Color::Rgb { r: 0xC5, g: 0x86, b: 0xC0 });
-
     colors.insert("label", Color::Rgb { r: 0xD7, g: 0xBA, b: 0x7D });
-
     colors.insert("comment", Color::Rgb { r: 0x60, g: 0x8B, b: 0x4E });
-
     colors.insert("punctuation.bracket", Color::Rgb { r: 0xD4, g: 0xD4, b: 0xD4 });
-
     colors.insert("punctuation.delimiter", Color::Rgb { r: 0xD4, g: 0xD4, b: 0xD4 });
-
     colors.insert("keyword", Color::Rgb { r: 0xC5, g: 0x86, b: 0xC0 });
-
     colors.insert("string", Color::Rgb { r: 0xCE, g: 0x91, b: 0x78 });
-
     colors.insert("escape", Color::Rgb { r: 0xd7, g: 0xba, b: 0x7d });
-
     colors.insert("operator", Color::Rgb { r: 0x56, g: 0x9C, b: 0xD6 });
-
     colors.insert("attribute", Color::Rgb { r: 0x4E, g: 0xC9, b: 0xB0 });
-
     colors
-
 }
-
 ```
 
 Cool, most of our work is now done, we are on the verge of having a basic syntax highlighting implementation working, we just need to make a few adjustments to the things we already have to query for capture and get their color in case it matches any. Let's start modifying our `Viewport`'s `set_cell` function to also take in a `Color`.
 
 ```diff-rust
-
 -    pub fn set_cell(&mut self, col: usize, row: usize, symbol: char) {
-
 +    pub fn set_cell(&mut self, col: usize, row: usize, symbol: char, color: Color) {
-
 -        self.buffer[pos] = Cell {
-
 -            symbol,
-
 -            fg: Color::Reset,
-
 -        }
-
 +        self.buffer[pos] = Cell { symbol, fg: color }
-
 }
-
 ```
 
 Similarly, we need to modify our `fill` function, for simplicity, we are going to accept a closure that takes in a row and column number and produces a `Color`, so we can pass any implementation we want as long as it matches the signature.
 
 ```diff-rust
-
 -    pub fn fill<T, U>(&mut self, mut code: T)
-
 +    pub fn fill<T, U, S>(&mut self, mut code: T, style_extractor: S)
-
      where
-
          T: Iterator<Item = U>,
-
          U: AsRef<str>,
-
 +        S: Fn(usize, usize) -> Color,
-
      {
-
          for row in 0..self.size.1 {
-
              let line = code.next();
-
              for col in 0..self.size.0 {
-
                  let symbol = match line {
-
                      Some(ref l) => l.as_ref().chars().nth(col).unwrap_or(' '),
-
                      None => ' ',
-
                  };
-
                  let symbol = match symbol {
-
                      s if s.is_whitespace() => ' ',
-
                      s => s,
-
                  };
-
 -                self.set_cell(col, row, symbol, style);
-
 +                let style = style_extractor(col, row);
-
 +                self.set_cell(col, row, symbol, style);
-
              }
-
          }
-
      }
-
 ```
 
 The last required touch on our viewport is to also set the foreground color of the terminal to the cell's foreground color. Which is also really simple with crossterm.
 
 ```diff-rust
-
     pub fn render(&self) {
-
         for (idx, cell) in self.buffer.iter().enumerate() {
-
             let row = idx / self.size.0;
-
             let col = idx % self.size.0;
-
             crossterm::queue!(
-
                 stdout(),
-
                 crossterm::cursor::MoveTo(col as u16, row as u16),
-
 +               crossterm::style::SetForegroundColor(cell.fg),
-
                 crossterm::style::Print(cell.symbol)
-
             )
-
             .expect("Failed to queue events to stdout");
-
         }
-
         stdout().flush().expect("Failed to flush stdout");
-
     }
-
 ```
 
 Great, now we still have an issue, our main function no longer works, as now we don't have a closure that fulfills what we just specified. Let's create it now. This closure should take in two arguments, `column` and `row`, and return a `Color`. Our main function will look like this after these changes:
 
 ```diff-rust
-
  fn main() {
-
      let content = include_str!("main.rs");
-
      let mut viewport = viewport::Viewport::new();
-
      let text_object = text_object::TextObject::new(content);
-
      let mut parser = tree_sitter::Parser::new();
-
      let language = tree_sitter_rust::language();
-
      parser.set_language(&language).unwrap();
-
      let tree = parser.parse(content, None).unwrap();
-
      let query = tree_sitter::Query::new(&language, tree_sitter_rust::HIGHLIGHTS_QUERY).unwrap();
-
      let mut cursor = tree_sitter::QueryCursor::new();
-
      let root_node = tree.root_node();
-
      let matches = cursor.matches(&query, root_node, content.as_bytes());
-
      let mut capture_map = HashMap::new();
-
      for m in matches {
-
          for capture in m.captures {
-
              let node = capture.node;
-
              let start = node.start_position();
-
              let end = node.end_position();
-
              let name = query.capture_names()[capture.index as usize];
-
              let line_list = capture_map.entry(start.row).or_insert(vec![]);
-
              line_list.push((start.column..end.column, name))
-
          }
-
      }
-
 +    let colors = colors::make_colors();
-
 +
-
 +    let style_extractor = |col: usize, row: usize| {
-
 +        let Some(name) = capture_map
-
 +            .get(&row)
-
 +            .and_then(|entry| entry.iter().find(|(range, _)| range.contains(&col)))
-
 +            .map(|(_, name)| name)
-
 +        else {
-
 +            return crossterm::style::Color::Reset;
-
 +        };
-
 +
-
 +        colors
-
 +            .get(name)
-
 +            .cloned()
-
 +            .unwrap_or(crossterm::style::Color::Reset)
-
 +    };
-
 -    viewport.fill(text_object.get_within(0..viewport.size.1));
-
 +    viewport.fill(text_object.get_within(0..viewport.size.1), style_extractor);
-
      viewport.render();
-
  }
-
 ```
 
 Congratulations! If you run the program, you'll see my awesome hand-picked colors for syntax highlighting. We could pretty much say we are done here, although this project is not really close to being an editor. If we just read from stdin rather than directly from a file and were a bit smarter about different file types, we would have something pretty similar to `cat` but with syntax highlighting. I think that's pretty cool.
