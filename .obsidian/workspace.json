@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "my-journey-learning-assembly.md",
+                "file": "implementing-syntax-highlighting.md",
                 "mode": "source",
                 "source": true
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "my-journey-learning-assembly.md",
+                "file": "implementing-syntax-highlighting.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "my-journey-learning-assembly.md",
+                "file": "implementing-syntax-highlighting.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "my-journey-learning-assembly.md"
+                "file": "implementing-syntax-highlighting.md"
               }
             }
           }
@@ -147,13 +147,13 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "3eda632bbccf65b0",
+  "active": "03f14b361c16ba6b",
   "lastOpenFiles": [
+    "my-journey-learning-assembly.md",
     "build-your-own-window-manager/Part 1.md",
     "implementing-syntax-highlighting.md",
     "implementing-syntax-highlighting/thoughts.md",
     "Welcome.md",
-    "my-journey-learning-assembly.md",
     "implementing-syntax-highlighting",
     "build-your-own-window-manager/thoughts.md",
     "build-your-own-window-manager"

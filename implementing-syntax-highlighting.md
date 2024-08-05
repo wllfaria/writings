@@ -10,12 +10,12 @@ tags:
   - syntax-highlighting
 ---
 
-I'm a huge text editor nerd, I mean, we use them every day how would we not be even remotely intrigued by how they function? I've been playing around with these ideas a lot in the past few months, going as far as even implementing a really silly text editor in rust, and one of the subjects that really caught my attention was syntax highlighting. I remember not finding that much content about this topic, and had to really dig to find any information, this is one of the motivators for this blog post.
+I'm a huge text editor nerd, I mean, we use them every day how would we not be even remotely intrigued by how they function? I've been playing around with these ideas a lot in the past few months, going as far as even implementing a really silly text editor in Rust and one of the subjects that really caught my attention was syntax highlighting. I remember not finding that much content about this topic, and I had to really dig to find any information, this is one of the motivators for this blog post.
 
 ## How editors render text
-There are many ways editors render text to the screen, some render at certain FPS [(looking at you, zed)](https://github.com/zed-industries/zed). and others render every time an event happens, which is a common way of rendering text on modal text editors, each approach has its own quirks, and this is not really that relevant for what we are building here.
+There are many ways editors render text to the screen, some render at certain FPS [(looking at you, zed)](https://github.com/zed-industries/zed). and others render every time an event happens, which is a common way of rendering text on modal text editors, each approach has its own quirks, and this is not really that relevant to what we are building here.
 
-I've met countless strategies of rendering text, but for simplicity, I'll show here one of the simpler ways I've stumbled upon. We can think of a terminal screen as a long list of `cells`, those cells are spots where a character could be rendered and, as long as we know the size in rows and columns of the terminal, we can calculate where each cell index should be located.
+I've met countless strategies for rendering text, but for simplicity, I'll show here one of the simpler ways I've stumbled upon. We can think of a terminal screen as a long list of `cells`, those cells are spots where a character could be rendered and, as long as we know the size in rows and columns of the terminal, we can calculate where each cell index should be located.
 
 ```rust
 use crossterm::style::Color;
@@ -53,7 +53,7 @@ impl Viewport {
 }
 ```
 
-Here, we create a single vector of cells to be more efficient with the total size of `columns * rows` of the terminal, which we get from [crossterm](https://github.com/crossterm-rs/crossterm), and initialize every cell to our default cell, which is merely a space without any style to it, this style is what we will fill with colors when we implement syntax highlighting later.
+Here, we create a single vector of cells to be more efficient with the total size of `columns * rows` of the terminal, which we get from [crossterm](https://github.com/crossterm-rs/crossterm) and initialize every cell to our default cell, which is merely a space without any style to it, this style is what we will fill with colors when we implement syntax highlighting later.
 
 <details>
 <summary>Add crossterm to your project through Cargo</summary>
@@ -64,14 +64,14 @@ cargo add crossterm
 
 </details>
 
-This simple structure represents our terminal viewport in a `virtual` space, allowing us to manipulate its content and later print everything to the actual output, but this is useless unless we have a way to fill this viewport with actual text from some source file.
+This simple structure represents our terminal viewport in a `virtual` space, allowing us to manipulate its content and later print everything to the actual output. However, this is useless unless we have a way to fill this viewport with actual text from some source file.
 
 ## Storing text in memory
 The inner representation of the contents of a text file within a code editor is a whole universe of discussion, there are many data structures and techniques for efficiency and ease of use, some editors may use a [Piece Table](https://en.wikipedia.org/wiki/Piece_table), others might use a [Gap Buffer](https://en.wikipedia.org/wiki/Gap_buffer), but a very common way is to use a [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)), which is used by some popular editors, like [Helix](https://github.com/helix-editor/helix). Depending on your project scope, sometimes even a simple vector of strings can cut it.
 
-We are not going to go into the pros and cons of each implementation, this might be subject for another article, so let's just pick ropes to be our data structure of choice.
+We are not going to go into the pros and cons of each implementation, this might be the subject of another article, so let's just pick ropes to be our data structure of choice.
 
-There is a very neat rust library called `ropey` which provides a very nice rope interface, and its actually very easy to use. So we can just define our `TextObject` struct to hold an instance of a rope, which we will use to manipulate the source code text and display it onscreen.
+There is a very neat rust library called `ropey` which provides a very nice rope interface, and it's actually very easy to use. So we can just define our `TextObject` struct to hold an instance of a rope, which we will use to manipulate the source code text and display it onscreen.
 ```rust
 use std::ops::Range;
 
@@ -89,7 +89,7 @@ impl TextObject {
 }
 ```
 
-Lets also make a public method to easily get a range of lines to display onscreen, so we can iterate over these lines and display them.
+Let's also make a public method to easily get a range of lines to display onscreen, so we can iterate over these lines and display them.
 ```rust
 pub fn get_within(&self, range: Range<usize>) -> impl Iterator<Item = &str> {
 	self.content
@@ -108,14 +108,14 @@ cargo add ropey
 
 </details>
 
-This method just takes in a range of lines to get from the source code, and returns an Iterator for each of the lines inner `&str`, this is a handy way to not take too much lines and waste computation on lines we will not render. We are just a built-in function from `ropey`, which allows us to get an iterator that starts at the line we specify on its argument.
+This method just takes in a range of lines to get from the source code, and returns an Iterator for each of the lines inner `&str`, this is a handy way to not take too many lines and waste computation on lines we will not render. We are just a built-in function from `ropey`, which allows us to get an iterator that starts at the line we specify on its argument.
 
-We are almost ready to render things onscreen, the missing part is that our `Viewport`doesn't really have a way to fill its cells, let's do that.
+We are almost ready to render things onscreen, the missing part is that our `Viewport ' doesn't really have a way to fill its cells, let's do that.
 
 ## Rendering text
-Lets modify our `Viewport` by adding a few new functions, one will fill the cells of our buffer from the iterator we can get from our `TextObject`. and the other will actually render our buffer to stdout.
+Let us modify our `Viewport` by adding a few new functions, one will fill the cells of our buffer from the iterator we can get from our `TextObject`. and the other will actually render our buffer to stdout.
 
-The approach we will follow here is a flexible approach that can later be extended to add double buffering, and also other optimizations, but I'll talk about them later, lets start by implementing a function to fill the viewport from the iterator.
+The approach we will follow here is a flexible approach that can later be extended to add double buffering, and also other optimizations, but I'll talk about them later, Let start by implementing a function to fill the viewport from the iterator.
 
 ```rust
 pub fn fill<T, U>(&mut self, mut code: T)
@@ -142,7 +142,7 @@ where
 
 Ok, we are doing quite a lot here, so let me explain, the first piece of this function is its declaration, our function takes in a generic argument that can be any iterator that yields `&str` as its inner type.
 
-Our inner loops go over every possible cell within the Viewport, and checks if there is any available character to store on our buffer, otherwise we just store an empty space. We are calling a utility function that looks like this:
+Our inner loops go over every possible cell within the Viewport, and check if there is any available character to store on our buffer, otherwise we just store an empty space. We are calling a utility function that looks like this:
 
 ```rust
 pub fn set_cell(&mut self, col: usize, row: usize, symbol: char) {
@@ -156,7 +156,7 @@ pub fn set_cell(&mut self, col: usize, row: usize, symbol: char) {
 
 Let's not worry too much about the styles for now, we will get back to them once we start implementing Syntax highlighting. We are almost ready to render something to the screen, all we need to implement now is a function to render the contents of our `Viewport`'s buffer and some glue code that will read a file, and use our structures to display the contents of that file to the terminal.
 
-Still on our Viewport, lets create a function to go over every cell in the buffer, and queue a print to the stdout on that cell respective location, this is really simple with the help of crossterm.
+Still on our Viewport, let's create a function to go over every cell in the buffer, and queue a print to the stdout on that cell's respective location, this is really simple with the help of crossterm.
 
 ```rust
 pub fn render(&self) {
@@ -176,7 +176,7 @@ pub fn render(&self) {
 
 This is a very simple function that simply iterates over every cell, and uses that simple formula to translate from the index of a cell to its location onscreen. With that position, we use crossterm functions to move the cursor to that location and print the symbol of that cell to that row and column.
 
-Let's not worry about the other fields `fg` and `bg` of our cells, although I'm pretty sure you can already imagine how we are going to use them later. Let's write our glue code and finally test our program, its time to write our main function.
+Let's not worry about the other fields `fg` and `bg` of our cells, although I'm pretty sure you can already imagine how we are going to use them later. Let's write our glue code and finally test our program, it's time to write our main function.
 
 ```rust
 mod text_object;
@@ -191,30 +191,30 @@ fn main() {
 }
 ```
 
-If you followed along to this point, running `cargo run` on your terminal will print the content of our `main.rs` function, which indicates that everything we did worked as expected! You now have what could be the beginning of a text editor, or a simple pager, or whatever you want to make with it.
+If you followed along to this point, running `cargo run` on your terminal will print the content of our `main.rs` function, which indicates that everything we did worked as expected! You now have what could be the beginning of a text editor, a simple pager, or whatever you want to make with it.
 
 > All the code we wrote until this point is available on the [project repository](https://github.com/wllfaria/syntax_highlighting/tree/text_rendering), in the `text_rendering` branch
 
 ## How editors highlight text
-For a long time, syntax highlighting for editors was a huge hassle, almost every older editor used regular expressions or other form of parsing common known tokens for a language into some representation that would group different tokens into categories, and apply colors for each of those categories, and up to this day, some modern editors still chose this approach for their implementation [(looking at you, VSCode)](https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide#tokenization) although we could argue that this is now a thing for the past.
+For a long time, syntax highlighting for editors was a huge hassle, almost every older editor used regular expressions or other forms of parsing common known tokens for a language into some representation that would group different tokens into categories, and apply colors for each of those categories, and up to this day, some modern editors still chose this approach for their implementation [(looking at you, VSCode)](https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide#tokenization) although we could argue that this is now a thing for the past.
 
-For the most part, modern editors use [Tree-Sitter](https://tree-sitter.github.io/tree-sitter/) to highlight text (and to a lot more).
+For the most part, modern editors use [Tree-Sitter](https://tree-sitter.github.io/tree-sitter/) to highlight text (and a lot more).
 Tree Sitter became the most popular way to handle syntax trees for many applications, it is fast, easy to use, and extensible in a way that is actually impressive, and since nobody really loves regex and probably you should also not use them if you ever need to implement syntax highlighting, we are going to use Tree Sitter.
-### What is tree sitter
+### What is tree-sitter
 Tree sitter is a parser generator that can parse language grammars into a concrete syntax tree.
 
 > Woah... I like your funny words, magic man... 
 
-Putting simply, tree sitter allows you to describe how to parse a language into an [CST](https://en.wikipedia.org/wiki/Parse_tree), and give you a lot of ways to traverse and manage this tree, from simply querying the tree for every token position and name, to doing complex operations that respect the context of a language grammar, like deleting the entire body of a function, or renaming every occurrence of a token to another name.
+Putting simply, tree-sitter allows you to describe how to parse a language into an [CST](https://en.wikipedia.org/wiki/Parse_tree), and gives you a lot of ways to traverse and manage this tree, from simply querying the tree for every token position and name, to doing complex operations that respect the context of a language grammar, like deleting the entire body of a function, or renaming every occurrence of a token to another name.
 
-Honestly, I could keep talking about Tree Sitter for hours, I really like it and I've used some of its features in multiple projects, What makes tree sitter compelling for us is that it is efficient, and allow you to implement **incremental** parsing, which is a game changer, specially when talking about large files. 
+Honestly, I could keep talking about Tree Sitter for hours, I really like it and I've used some of its features in multiple projects, What makes tree-sitter compelling for us is that it is efficient, and allows you to implement **incremental** parsing, which is a game changer, especially when talking about large files. 
 
-## Syntax highlighting with tree sitter
-Luckily for us, despite being written in C, tree sitter has awesome bindings for rust, which make our lives easier by not having to do any work with FFIs and just using code someone else wrote for us, we all love doing that, right?
+## Syntax highlighting with tree-sitter
+Luckily for us, despite being written in C, tree-sitter has awesome bindings for Rust, which make our lives easier by not having to do any work with FFIs and just using code someone else wrote for us, we all love doing that, right?
 
-To use tree sitter in basically any way, we need to set some things up, each language you want to parse will need a `Parser` which is the core component that turns the source code into an syntax tree that we can work with. After making a parser, we need to tell it the rules by which our language should be parsed, this is done by providing a `Language` to the parser, which is the compiled grammar rules for a given language, and after that we can throw any piece of code of that respective language and it will get parsed.
+To use tree-sitter in basically any way, we need to set some things up, each language you want to parse will need a `Parser` which is the core component that turns the source code into a syntax tree that we can work with. After making a parser, we need to tell it the rules by which our language should be parsed, this is done by providing a `Language` to the parser, which is the compiled grammar rules for a given language, and after that, we can throw any piece of code of that respective language and it will get parsed.
 
-Let's modify our main function to include our parser and all the setup to start parsing a language, its pretty simple.
+Let's modify our main function to include our parser and all the setup to start parsing a language, it's pretty simple.
 
 ```rust
 mod text_object;
@@ -244,11 +244,11 @@ cargo add tree_sitter tree_sitter_rust
 
 </details>
 
-I'll not explain a lot of the details behind Tree Sitter as this is guide aims to show how to use tree sitter to implement one way of highlighting text. So if you feel like you don't understand how tree sitter is doing something, you might want to take a deeper look on how it works.
+I'll not explain a lot of the details behind Tree Sitter as this guide aims to show how to use Tree Sitter to implement one way of highlighting text. So if you feel like you don't understand how tree sitter is doing something, you might want to take a deeper look at how it works.
 
-With the example above, we now have a tree that  represents our source code, but to implement syntax highlighting we need to do a little more. Tree sitter has a concept of queries, which uses a syntax that is very similar to lisp, you'll notice that tree-sitter uses S-Expressions to represent the grammars, but this is not really relevant for now.
+With the example above, we now have a tree that represents our source code, but to implement syntax highlighting we need to do a little more. Tree sitter has a concept of queries, which uses a syntax that is very similar to lisp, you'll notice that tree-sitter uses S-Expressions to represent the grammar, but this is not relevant for now.
 
-`tree_sitter_rust` also provide us with a query for rust, but you could write your own to change the capture names or how things are grouped, but for our use case the default one is more than enough.
+`tree_sitter_rust` also provides us with a query for rust, but you could write your own to change the capture names or how things are grouped, but for our use case, the default one is more than enough.
 
 ```rust
 fn main() {
@@ -265,16 +265,16 @@ fn main() {
 }
 ```
 
-The matches is an iterator over all the matches in the code we just parsed, starting from the `root_node` of our tree and going through all the code, each match represents a node, and has its start and end position, and also line and column on the source file, which starts to bring up the question, how will we use this list of captures to highlight our code?
+The `matches` is an iterator over all the matches in the code we just parsed, starting from the `root_node` of our tree and going through all the code, each match represents a node, and has its start and end position, and also line and column on the source file, which starts to bring up the question, how will we use this list of captures to highlight our code?
 
 ## Strategies for syntax highlighting
-When I was first searching about this topic, I couldn't find that much information about it, so I spent a long time looking into open source text editors to check their implementations, and looking for technical content to educate myself on the subject.
+When I was first searching about this topic, I couldn't find that much information about it, so I spent a long time looking into open-source text editors to check their implementations and looking for technical content to educate myself on the subject.
 
 The most naive solution I can think of would be to just check if a given cell of our buffer is present on this list of captures within any range, and apply some styling accordingly, but we don't need to think too much about it to see that this solution is not the most viable one, as we would potentially iterate over all the captures on a possibly massive list of matches, which would make our code very slow.
 
 So what are the alternatives? Well, turns out there are many, I'm going to show a simple one, where we will iterate over our capture list and convert it into a data structure that allows us to have better lookups, a `HashMap` of line numbers to a list of captures on that given line. Let me explain.
 
-When we start filling our buffer, we always know, or can easily calculate which line and column a cell is within the text content, so if we map the captures into smaller lists, each list representing a single line, and have each line easily accessible through keys of a HashMap, we would optimize a lot the amount of iterations we would have to do, so, lets do that
+When we start filling our buffer, we always know, or can easily calculate which line and column a cell is within the text content, so if we map the captures into smaller lists, each list representing a single line, and have each line easily accessible through keys of a HashMap, we would optimize a lot the number of iterations we would have to do, so let's do that
 
 ```rust
 fn main() {
@@ -300,11 +300,11 @@ fn main() {
 }
 ```
 
-A match in tree sitter can be a scope of your code, like a function, and this scope can have multiple captures inside of it, like variables, arguments, and all the other pieces that constructs a function, thats why we have to go over every match, and every capture of each match. Each capture gives us the node, which has a start and end position, and also has an index that can be used to get the name of the capture from  the query.
+A match in tree sitter can be a scope of your code, like a function, and this scope can have multiple captures inside of it, like variables, arguments, and all the other pieces that construct a function, that's why we have to go over every match, and every capture of each match. Each capture gives us the node, which has a start and end position, and also has an index that can be used to get the name of the capture from the query.
 
-With all that information, we get an existing entry, or insert a new one onto our map, and push the start/end column of a capture along with its name so we can look up the captures when rendering.
+With all that information, we get an existing entry or insert a new one onto our map, and push the start/end column of capture along with its name so we can look up the captures when rendering.
 
-Now we need to map capture names to colors, so that we can finally see some colored text on our screens. I'll not explain much of this, so just copy this `HashMap` of some names that are present on our rust query to some arbitrary colors I've chosen.
+Now we need to map capture names to colors so that we can finally see some colored text on our screens. I'll not explain much of this, so just copy this `HashMap` of some names that are present on our rust query to some arbitrary colors I've chosen.
 
 ```rust
 use std::collections::HashMap;
@@ -336,7 +336,7 @@ fn make_colors() -> HashMap<&'static str, Color> {
 }
 ```
 
-Cool, most of our work is now done, we are on the verge of having a basic syntax highlighting implementation working, we just need to do a few adjustments to the things we already have in order to query for a capture and get its color in case it matches any, lets start modifying our `Viewport`'s `set_cell` function to also take in a `Color`.
+Cool, most of our work is now done, we are on the verge of having a basic syntax highlighting implementation working, we just need to make a few adjustments to the things we already have to query for capture and get its color in case it matches any, let's start modifying our `Viewport`'s `set_cell` function to also take in a `Color`.
 
 ```diff-rust
 -    pub fn set_cell(&mut self, col: usize, row: usize, symbol: char) {
@@ -349,7 +349,7 @@ Cool, most of our work is now done, we are on the verge of having a basic syntax
 	 }
 ```
 
-Similarly, we need to modify our `fill` function, for simplicity, we are going to accept a closure that takes in a row and column number, and produces a `Color`, so we can pass any implementation we want as long as it matches the signature.
+Similarly, we need to modify our `fill` function, for simplicity, we are going to accept a closure that takes in a row and column number and produces a `Color`, so we can pass any implementation we want as long as it matches the signature.
 
 ```diff-rust
 -    pub fn fill<T, U>(&mut self, mut code: T)
@@ -378,7 +378,7 @@ Similarly, we need to modify our `fill` function, for simplicity, we are going t
      }
 ```
 
-And the last required touch on our viewport is to also set the foreground color of the terminal to the cell's foreground color. Which is also really simple with crossterm.
+The last required touch on our viewport is to also set the foreground color of the terminal to the cell's foreground color. Which is also really simple with crossterm.
 
 ```diff-rust
     pub fn render(&self) {
@@ -397,7 +397,7 @@ And the last required touch on our viewport is to also set the foreground color 
     }
 ```
 
-Great, now we still have an issue, our main function no longer works, as now we don't have a closure that fulfills what we just specified, lets create it now, this closure should take in two arguments, `column` and `row`, and return a `Color` our main function will look like this after these changes:
+Great, now we still have an issue, our main function no longer works, as now we don't have a closure that fulfills what we just specified, let's create it now, this closure should take in two arguments, `column` and `row`, and return a `Color` our main function will look like this after these changes:
 
 ```diff-rust
  fn main() {
@@ -449,6 +449,6 @@ Great, now we still have an issue, our main function no longer works, as now we 
  }
 ```
 
-Congratulations! If you run the program you'll see my awesome hand picked colors for syntax highlighting. We could pretty much say we are done here, although this project is not really close from being an editor, if we just read from stdin rather than directly from a file, and were a bit smarter about different file types, we would have something pretty similar to `cat` but with syntax highlighting, i think that's pretty cool.
+Congratulations! If you run the program you'll see my awesome hand-picked colors for syntax highlighting. We could pretty much say we are done here, although this project is not really close to being an editor, if we just read from stdin rather than directly from a file, and were a bit smarter about different file types, we would have something pretty similar to `cat` but with syntax highlighting, I think that's pretty cool.
 
 You can find the finished code for this article on the [main branch of the repository](https://github.com/wllfaria/syntax_highlighting), and I hope you enjoyed this read, thanks for reaching this far.
